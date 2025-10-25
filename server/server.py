@@ -13,8 +13,7 @@ from aiortc.contrib.media import (
 )
 
 ROOT = os.path.dirname(__file__)
-pcs = set()
-
+pcs = {}
 
 async def index(request):
     content = open(os.path.join(ROOT, "index.html"), "r").read()
@@ -32,7 +31,7 @@ async def offer(request):
 
     pc = RTCPeerConnection()
     pc_id = f"PeerConnection({uuid.uuid4()})"
-    pcs.add(pc)
+    pcs[pc_id] = pc
 
     print(f"Created for {request.remote}")
 
@@ -48,7 +47,7 @@ async def offer(request):
         print(f"Connection state is {pc.connectionState}")
         if pc.connectionState == "failed":
             await pc.close()
-            pcs.discard(pc)
+            pcs.pop(pc_id, None)
 
     @pc.on("track")
     def on_track(track):
@@ -77,10 +76,9 @@ async def offer(request):
         ),
     )
 
-
 async def on_shutdown(app):
     # close peer connections
-    coros = [pc.close() for pc in pcs]
+    coros = [pc.close() for pc in pcs.values()]
     await asyncio.gather(*coros)
     pcs.clear()
 
