@@ -2,10 +2,12 @@
 var peerConn = null;
 
 // data channel
-var dc = null, dcInterval = null;
+var dc = null
+var dcInterval = null;
 
 var localStream = null;
 var localVideo = document.getElementById('local-video');
+var remoteVideos = document.getElementById('remote-videos');
 var remoteVideo = document.getElementById('remote-video');
 var remoteAudio = document.getElementById('audio');
 
@@ -32,8 +34,16 @@ function createPeerConnection() {
 
     peerConn = new RTCPeerConnection(config);
     peerConn.ontrack = function(event) {
+        console.log("++++ ON TRACK", event.track.kind)
         if (event.track.kind == 'video') {
-            remoteVideo.srcObject = event.streams[0];
+            const video = document.createElement("video");
+            video.srcObject = event.streams[0];
+            video.autoplay = true;
+            video.playsInline = true;
+            video.controls = true;
+            video.classList.add('remote-video');
+            remoteVideos.appendChild(video)
+            // remoteVideo.srcObject = event.streams[0];
         } else {
             remoteAudio.srcObject = event.streams[0];
         }
@@ -74,8 +84,11 @@ function negotiate() {
             method: 'POST'
         });
     }).then((response) => {
-        return response.json();
+        const resp = response.json()
+        console.log(resp)
+        return resp;
     }).then((answer) => {
+        // console.log("answer", answer)
         return peerConn.setRemoteDescription(answer);
     }).catch((e) => {
         alert(e);
@@ -111,6 +124,38 @@ function connect() {
             return new Date().getTime() - time_start;
         }
     };
+
+    var parameters = {
+        ordered: true,
+        // ordered: false,
+        // maxRetransmits: 0,
+        // maxPacketLifetime: 500,
+    }
+
+    dc = peerConn.createDataChannel('chat', parameters);
+    dc.addEventListener('close', () => {
+        clearInterval(dcInterval);
+        console.log("dc close")
+    });
+    dc.addEventListener('open', () => {
+        // dc.send({name: "Shaita"})
+        dc.send(JSON.stringify({ type: "name", name: "Rombora" }));
+        // dcInterval = setInterval(() => {
+        //     var message = 'ping ' + current_stamp();
+        //     // console.log("dc ->", message)
+        //     dc.send(message);
+        // }, 1000);
+    });
+    dc.addEventListener('message', (evt) => {
+        console.log("message", evt.data)
+        // console.log("dc <-", evt.data)
+        if (evt.data.substring(0, 4) === 'pong') {
+            var elapsed_ms = current_stamp() - parseInt(evt.data.substring(5), 10);
+            // console.log("dc rtt", elapsed_ms)
+
+        }
+    });
+
     localStream.getTracks().forEach((track) => {
         peerConn.addTrack(track, localStream);
     });
