@@ -19,10 +19,73 @@ from av import VideoFrame
 ROOT = os.path.dirname(__file__)
 import attridict
 
+import numpy as np
+import time
+from fractions import Fraction
+
+
 peer_data = attridict()
 count=0
 MAX_TRANSCEIVERS = 1
 relay = MediaRelay()
+
+
+class CompositeTrack(VideoStreamTrack):
+    def __init__(self, track, peer_data, pc_id):
+        super().__init__()
+        self.track = track
+        self.peer_data = peer_data
+        self.pc_id = pc_id
+
+    async def recv(self):
+        frames = []
+
+        for pc_id, pdata in self.peer_data.items():
+
+            if self.pc_id == pc_id:
+                continue
+
+            track = pdata.tracks.video
+            if track is None:
+                continue
+            try:
+                frame = await track.recv()
+                img = frame.to_ndarray(format="bgr24")
+
+                cv2.putText(
+                    img, 
+                    pdata.name,
+                    (40, 40),                       # position
+                    cv2.FONT_HERSHEY_SIMPLEX, 
+                    1.2,                            # size
+                    (0, 255, 0),                    # color (green)
+                    3
+                )
+
+                frames.append(img)
+            except Exception as e:
+                pass
+
+        if not frames:
+            # return a black frame
+            black = np.zeros((480, 640, 3), dtype=np.uint8)
+            out = VideoFrame.from_ndarray(black, format="bgr24")
+            out.pts = int(time.time() * 90000)
+            out.time_base = Fraction(1, 90000)
+            return out
+
+        try:
+            h = 480
+            resized = [cv2.resize(f, (h, h)) for f in frames]
+            combined = cv2.hconcat(resized)
+
+            new_frame = VideoFrame.from_ndarray(combined, format="bgr24")
+            new_frame.pts = int(time.time() * 90000)
+            new_frame.time_base = Fraction(1, 90000)
+            return new_frame
+        except Exception as e:
+            return None
+
 
 class LabelVideoStream(VideoStreamTrack):
     def __init__(self, source_track, username, pc_id):
@@ -81,7 +144,7 @@ async def offer(request):
         "peer_connection": pc,
         "tracks": {"video": None, "audio": None},
         "transceivers": [],
-        "name": None,
+        "name": pc_id,
     })
 
     for i in range(MAX_TRANSCEIVERS):
@@ -98,9 +161,7 @@ async def offer(request):
             print("message", data)
 
             if data.get("type") == "name":
-                # print(data["name"], "==============")
-                peer_data[pc_id]["name"] = data["name"]
-
+                pass
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
@@ -116,15 +177,9 @@ async def offer(request):
         if track.kind == "audio":
             ...
         elif track.kind == "video":
-            overlay = LabelVideoStream(track, username=f"{pc_id}", pc_id=pc_id)
-            peer_data[pc_id]["tracks"]["video"] = overlay
-
-            for other_pc_id, pc_data in peer_data.items():
-                if other_pc_id == pc_id:
-                    pass
-                else:
-                    pc_data.peer_connection.addTrack(overlay)
-                    pc.addTrack(pc_data.tracks.video)
+            peer_data[pc_id]["tracks"]["video"] = track
+            overlay = CompositeTrack(track, peer_data, pc_id)
+            pc.addTrack(overlay)
 
         @track.on("ended")
         async def on_ended():
