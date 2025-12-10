@@ -38,13 +38,11 @@ class LabelVideoStream(VideoStreamTrack):
 
         # Convert to numpy for processing
         img = frame.to_ndarray(format="bgr24")
-        # print("aaaaaaaaaaaaaaaaaaaaaaa", peer_data[pc_id])
-        # print("aaaaaaaaaaaaaaaaaaaaaaa", pc_id)
         # Add text overlay
         cv2.putText(
             img, 
-            # self.name,
-            peer_data[self.pc_id]["name"],
+            self.username,
+            # peer_data[self.pc_id]["name"],
             (40, 40),                      # position
             cv2.FONT_HERSHEY_SIMPLEX, 
             1.2,                            # size
@@ -79,12 +77,12 @@ async def offer(request):
     pc_id = f"pc{count}"
     print("peer connection id: ", pc_id)
 
-    peer_data[pc_id] = {
+    peer_data[pc_id] = attridict({
         "peer_connection": pc,
         "tracks": {"video": None, "audio": None},
         "transceivers": [],
         "name": None,
-    }
+    })
 
     for i in range(MAX_TRANSCEIVERS):
         transceiver = pc.addTransceiver("video", direction="sendrecv")
@@ -118,27 +116,15 @@ async def offer(request):
         if track.kind == "audio":
             ...
         elif track.kind == "video":
-            peer_data[pc_id]["tracks"]["video"] = track
+            overlay = LabelVideoStream(track, username=f"{pc_id}", pc_id=pc_id)
+            peer_data[pc_id]["tracks"]["video"] = overlay
 
-            # peer_data[pc_id]["transceiver"].sender.replaceTrack(
-            #     # track
-            #     peer_data["pc1"]["tracks"]["video"]
-            # )
-
-            # for sender in peer_data[pc_id]["senders"]:
-            #     sender.replaceTrack(track)
-
-
-            # pc.addTrack(track)
-
-            overlay = LabelVideoStream(track, username=f"Alvin", pc_id=pc_id)
-            pc.addTrack(overlay)
-
-            # pc.addTrack(
-            #     VideoTransformTrack(
-            #         relay.subscribe(track)
-            #     )
-            # )
+            for other_pc_id, pc_data in peer_data.items():
+                if other_pc_id == pc_id:
+                    pass
+                else:
+                    pc_data.peer_connection.addTrack(overlay)
+                    pc.addTrack(pc_data.tracks.video)
 
         @track.on("ended")
         async def on_ended():
