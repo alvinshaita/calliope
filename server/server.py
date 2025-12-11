@@ -22,7 +22,7 @@ import attridict
 import numpy as np
 import time
 from fractions import Fraction
-
+import math
 
 peer_data = attridict()
 count=0
@@ -36,9 +36,17 @@ class CompositeTrack(VideoStreamTrack):
         self.track = track
         self.peer_data = peer_data
         self.pc_id = pc_id
+        self.full_height = 1000
+        self.full_width = 1000
 
     async def recv(self):
         frames = []
+
+        # if len(self.peer_data) == 1:
+        #     print("1111111111")
+        #     return None
+        # # else:
+        # #     print("2222222222222")
 
         for pc_id, pdata in self.peer_data.items():
 
@@ -75,10 +83,41 @@ class CompositeTrack(VideoStreamTrack):
             return out
 
         try:
-            h = 480
-            resized = [cv2.resize(f, (h, h)) for f in frames]
-            combined = cv2.hconcat(resized)
+            # h = 480
+            # resized = [cv2.resize(f, (h, h)) for f in frames]
+            # combined = cv2.hconcat(resized)
 
+            # new_frame = VideoFrame.from_ndarray(combined, format="bgr24")
+            # new_frame.pts = int(time.time() * 90000)
+            # new_frame.time_base = Fraction(1, 90000)
+            # return new_frame
+
+
+            num_clients = len(frames)
+            cols = math.ceil(math.sqrt(num_clients))
+            rows = math.ceil(num_clients / cols)
+            cell_width = self.full_width // cols
+            cell_height = self.full_height // rows
+
+            # Resize frames
+            resized_frames = [cv2.resize(f, (cell_width, cell_height)) for f in frames]
+
+            # Build the grid row by row
+            grid_rows = []
+            for r in range(rows):
+                row_frames = []
+                for c in range(cols):
+                    idx = r * cols + c
+                    if idx < num_clients:
+                        row_frames.append(resized_frames[idx])
+                    else:
+                        # empty cell
+                        row_frames.append(np.zeros((cell_height, cell_width, 3), dtype=np.uint8))
+                grid_rows.append(cv2.hconcat(row_frames))
+
+            combined = cv2.vconcat(grid_rows)
+
+            # Convert to VideoFrame
             new_frame = VideoFrame.from_ndarray(combined, format="bgr24")
             new_frame.pts = int(time.time() * 90000)
             new_frame.time_base = Fraction(1, 90000)
@@ -130,6 +169,11 @@ async def javascript(request):
     return web.Response(content_type="application/javascript", text=content)
 
 
+async def css(request):
+    content = open(os.path.join(ROOT, "style.css"), "r").read()
+    return web.Response(content_type="text/css", text=content)
+
+
 async def offer(request):
     global count
     count+=1
@@ -175,7 +219,16 @@ async def offer(request):
         print(f"Track {track.kind} received")
 
         if track.kind == "audio":
-            ...
+            # ...
+            for other_pc_id, other_pc_data in peer_data.items():
+                if other_pc_id != pc_id:
+                    print("bbbbbbbbbbb", other_pc_id, pc_id)
+                    other_pc_data.peer_connection.addTrack(relay.subscribe(track))
+
+
+
+            # peer_data[pc_id]["tracks"]["audio"] = track
+            # pc.addTrack(relay.subscribe(track))
         elif track.kind == "video":
             peer_data[pc_id]["tracks"]["video"] = track
             overlay = CompositeTrack(track, peer_data, pc_id)
@@ -225,6 +278,7 @@ if __name__ == "__main__":
 
     app.router.add_get("/", index)
     app.router.add_get("/client.js", javascript)
+    app.router.add_get("/style.css", css)
     app.router.add_post("/offer", offer)
 
     web.run_app(app, access_log=None, host="0.0.0.0", port=8000)
