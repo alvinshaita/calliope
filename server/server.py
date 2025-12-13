@@ -48,7 +48,7 @@ class CompositeTrack(VideoStreamTrack):
         # # else:
         # #     print("2222222222222")
 
-        for pc_id, pdata in self.peer_data.items():
+        for pc_id, pdata in list(self.peer_data.items()):   
 
             if self.pc_id == pc_id:
                 continue
@@ -220,7 +220,7 @@ async def offer(request):
 
         if track.kind == "audio":
             # ...
-            for other_pc_id, other_pc_data in peer_data.items():
+            for other_pc_id, other_pc_data in list(peer_data.items()):
                 if other_pc_id != pc_id:
                     print("bbbbbbbbbbb", other_pc_id, pc_id)
                     other_pc_data.peer_connection.addTrack(relay.subscribe(track))
