@@ -199,13 +199,27 @@ async def offer(request):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
+        @channel.on("open")
+        def on_open():
+            print("++++ open")
+            # user_id = json.dumps({
+            #     "type": "idff",
+            #     "user_id": pc_id
+            # })
+            # channel.send(user_id)
+
+
         @channel.on("message")
         def on_message(message):
             data = json.loads(message)
-            print("message", data)
+            print("++++message", data)
 
             if data.get("type") == "name":
-                pass
+                user_id = json.dumps({
+                    "type": "user_id",
+                    "user_id": pc_id
+                })
+                channel.send(user_id)
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
