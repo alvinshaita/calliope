@@ -195,42 +195,48 @@ async def offer(request):
         transceiver = pc.addTransceiver("video", direction="sendrecv")
         peer_data[pc_id]["transceivers"].append(transceiver)
 
-    print(f"Created for {request.remote}")
+    print("----------", peer_data)
 
     @pc.on("datachannel")
     def on_datachannel(channel):
         @channel.on("open")
         def on_open():
-            print("++++ open")
-            # user_id = json.dumps({
-            #     "type": "idff",
-            #     "user_id": pc_id
-            # })
-            # channel.send(user_id)
+            print("datachannel open")
 
+        @channel.on("close")
+        def on_close():
+            print("datachannel closed")
 
         @channel.on("message")
-        def on_message(message):
+        async def on_message(message):
             data = json.loads(message)
-            print("++++message", data)
+            print("datachannel message: ", data)
 
             if data.get("type") == "name":
+                print("datachannel message  name")
                 user_id = json.dumps({
                     "type": "user_id",
                     "user_id": pc_id
                 })
                 channel.send(user_id)
+            elif data.get("type") == "close":
+                print("datachannel message - close")
+                await pc.close()
+                peer_data.pop(pc_id, None)
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
-        print(f"Connection state is {pc.connectionState}")
+        print(f"Connection state is {pc.connectionState} == {pc.iceConnectionState}")
         if pc.connectionState == "failed":
+            await pc.close()
+            peer_data.pop(pc_id, None)
+        if pc.connectionState == "closed":
             await pc.close()
             peer_data.pop(pc_id, None)
 
     @pc.on("track")
     def on_track(track):
-        print(f"Track {track.kind} received")
+        print(f"track {track.kind} received")
 
         if track.kind == "audio":
             # ...

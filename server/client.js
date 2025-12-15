@@ -3,7 +3,6 @@ var peerConn = null;
 
 // data channel
 var dc = null
-var dcInterval = null;
 
 var localVideoStream = null;
 
@@ -221,12 +220,11 @@ function connect() {
     dc = peerConn.createDataChannel('chat', parameters);
 
     dc.addEventListener('close', () => {
-        clearInterval(dcInterval);
-        console.log("+++ on close +++")
+        console.log("+++ datachannel on close")
     });
 
     dc.addEventListener('open', () => {
-        console.log("+++ on open")
+        console.log("+++ datachannel on open")
         dc.send(JSON.stringify({ type: "name", name: "aaaa" }));
     });
 
@@ -258,6 +256,7 @@ function connect() {
 function stop() {
     // close data channel
     if (dc) {
+        dc.send(JSON.stringify({ type: "close", close: true }));
         dc.close();
     }
 
