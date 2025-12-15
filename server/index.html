@@ -196,7 +196,7 @@
         <div class="video-call-wrapper">
         	<!-- <video id="remote-video" autoplay="true" playsinline="true"></video> -->
         	<!-- video element for remote -->
-        	<video id="remote-video" disablePictureInPicture autoplay="true" playsinline="true"></video>
+        	<video class="main-video" disablePictureInPicture autoplay="true" playsinline="true"></video>
 
 
           <!-- <div class="video-participant">
@@ -278,6 +278,7 @@
           <button class="video-action-button camera"></button>
           <button class="video-action-button maximize"></button>
           <button class="video-action-button endcall">Leave</button>
+          <button class="video-action-button startcall">Connect</button>
           <button class="video-action-button magnifier">
             <!-- ZoomIn icon -->
             <svg
@@ -330,11 +331,7 @@
       <!-- Right Side -->
       <div class="right-side">
       	<div class="local-video-mini-view">
-      	<!-- <div class="local-video-viewk"> -->
-      		<!-- sss -->
-      		<!-- <video id="local-video" autoplay="true" playsinline="true" muted></video> -->
-      		<video id="local-video" disablePictureInPicture autoplay="true" playsinline="true" muted></video>
-      		
+      		<video class="local-video-mini" disablePictureInPicture autoplay="true" playsinline="true" muted></video>
       	</div>
         <button class="btn-close-right">
           <!-- Close Icon -->
@@ -441,7 +438,6 @@
         <!-- expand icon -->
       </button>
     </div>
-    <script src="script.js"></script>
     <script src="client.js" type="text/javascript"></script>
   </body>
 </html>

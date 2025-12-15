@@ -5,11 +5,19 @@ var peerConn = null;
 var dc = null
 var dcInterval = null;
 
-var localStream = null;
-var localVideo = document.getElementById('local-video');
-// var remoteVideos = document.getElementById('remote-videos');
-var remoteVideo = document.getElementById('remote-video');
+var localVideoStream = null;
+
+
 var remoteAudio = document.getElementById('audio');
+
+const mainVideo = document.querySelector('.main-video');
+const localVideoMini = document.querySelector('.local-video-mini');
+const videoCallActions = document.querySelector('.video-call-actions')
+const rightSide = document.querySelector('.right-side');
+const videoActionEndCall = document.querySelector('.video-action-button.endcall');
+const videoActionStartCall = document.querySelector('.video-action-button.startcall');
+
+// rightSide.classList.remove('show');
 
 var userId = null
 
@@ -75,16 +83,32 @@ var chatData = [
 startButton.onclick = () => {
 	console.log("== start")
 	start()
+    // mainVideo.srcObject = localVideoStream
 }
 
-connectButton.onclick = () => {
+// connectButton.onclick = () => {
+videoActionStartCall.onclick = () => {
 	console.log("== connect")
 	connect()
+    // videoCallActions.style.display = "flex";
+    rightSide.style.display = "flex";
+    // mainVideo.style.display = "flex"
+    localVideoMini.srcObject = localVideoStream
+
+    videoActionEndCall.style.display = "block"
+    videoActionStartCall.style.display = "none"
 }
 
-stopButton.onclick = () => {
+// stopButton.onclick = () => {
+videoActionEndCall.onclick = () => {
 	console.log("== stop")
 	stop()
+    localVideoMini.srcObject = null;
+    // mainVideo.srcObject = null;
+    mainVideo.srcObject = localVideoStream;
+    rightSide.style.display = "none";
+    videoActionEndCall.style.display = "none"
+    videoActionStartCall.style.display = "block"
 }
 start()
 function createPeerConnection() {
@@ -102,11 +126,11 @@ function createPeerConnection() {
             // video.autoplay = true;
             // video.playsInline = true;
             // video.controls = true;
-            // video.classList.add('remote-video');
+            // video.classList.add('main-video');
             // remoteVideos.appendChild(video)
 
 
-            remoteVideo.srcObject = event.streams[0];
+            mainVideo.srcObject = event.streams[0];
         } else {
             remoteAudio.srcObject = event.streams[0];
         }
@@ -169,10 +193,10 @@ function start() {
 
     if (constraints.audio || constraints.video) {
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-            localStream = stream
-            localVideo.srcObject = stream
+            localVideoStream = stream
+            // localVideoMini.srcObject = stream
 
-            // remoteVideo.srcObject = stream
+            mainVideo.srcObject = stream
         }, (err) => {
             alert('Could not acquire media: ' + err);
         });
@@ -201,23 +225,20 @@ function connect() {
     }
 
     dc = peerConn.createDataChannel('chat', parameters);
+
     dc.addEventListener('close', () => {
         clearInterval(dcInterval);
-        console.log("dc close")
+        console.log("+++ on close +++")
     });
+
     dc.addEventListener('open', () => {
-        // dc.send({name: "Shaita"})
+        console.log("+++ on open")
         dc.send(JSON.stringify({ type: "name", name: "aaaa" }));
-        // dcInterval = setInterval(() => {
-        //     var message = 'ping ' + current_stamp();
-        //     // console.log("dc ->", message)
-        //     dc.send(message);
-        // }, 1000);
     });
+
     dc.addEventListener('message', (evt) => {
-        console.log("+++++ message", evt.data)
         message = JSON.parse(evt.data)
-        console.log("dddddd", message)
+        console.log("+++ on message:", message)
         if (message.type === "user_id") {
             userId = message.user_id
 
@@ -233,8 +254,8 @@ function connect() {
         // }
     });
 
-    localStream.getTracks().forEach((track) => {
-        peerConn.addTrack(track, localStream);
+    localVideoStream.getTracks().forEach((track) => {
+        peerConn.addTrack(track, localVideoStream);
     });
     
     negotiate();
@@ -255,13 +276,14 @@ function stop() {
         });
     }
 
-    // close local audio / video
-    peerConn.getSenders().forEach((sender) => {
-        sender.track.stop();
-    });
+    // // close local audio / video
+    // peerConn.getSenders().forEach((sender) => {
+    //     sender.track.stop();
+    // });
 
     // close peer connection
     setTimeout(() => {
+        console.log("close pc====", peerConn)
         peerConn.close();
     }, 500);
 }
@@ -274,7 +296,6 @@ function stop() {
 const switchMode = document.querySelector('button.mode-switch'),
   body = document.querySelector('body'),
   closeBtn = document.querySelector('.btn-close-right'),
-  rightSide = document.querySelector('.right-side'),
   expandBtn = document.querySelector('.expand-btn');
 
 switchMode.addEventListener('click', () => {
