@@ -104,6 +104,11 @@ videoActionEndCall.onclick = () => {
     videoActionStartCall.style.display = "block"
 }
 start()
+
+window.onbeforeunload = function (event) {
+    stop()
+};
+
 function createPeerConnection() {
     var config = {
         sdpSemantics: 'unified-plan',
