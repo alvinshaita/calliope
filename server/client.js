@@ -80,12 +80,6 @@ var chatData = [
     },
 ]
 
-startButton.onclick = () => {
-	console.log("== start")
-	start()
-    // mainVideo.srcObject = localVideoStream
-}
-
 // connectButton.onclick = () => {
 videoActionStartCall.onclick = () => {
 	console.log("== connect")
