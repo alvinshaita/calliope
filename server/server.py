@@ -39,10 +39,19 @@ class CompositeTrack(VideoStreamTrack):
         self.full_height = 1000
         self.full_width = 1000
 
+    def send_frame(self):
+        ...
+
     async def recv(self):
         frames = []
 
-        # if len(self.peer_data) == 1:
+        if len(self.peer_data) == 1:
+            # print("111111111111111111111111111111")
+            frame = await self.track.recv()
+            return frame
+        else:
+            ...
+            # print("000000000000000000000000000000", self.peer_data)
         #     print("1111111111")
         #     return None
         # # else:
@@ -180,6 +189,9 @@ async def offer(request):
     params = await request.json()
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
 
+    caller_name = params["caller_name"]
+    call_id = params["call_id"]
+
     pc = RTCPeerConnection()
     pc_id = f"pc{count}"
     print("peer connection id: ", pc_id)
@@ -188,7 +200,8 @@ async def offer(request):
         "peer_connection": pc,
         "tracks": {"video": None, "audio": None},
         "transceivers": [],
-        "name": pc_id,
+        "name": caller_name,
+        "id": pc_id
     })
 
     for i in range(MAX_TRANSCEIVERS):

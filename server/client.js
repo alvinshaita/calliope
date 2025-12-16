@@ -20,6 +20,7 @@ const videoActionStartCall = document.querySelector('.video-action-button.startc
 
 const newCall = document.querySelector('.new-call');
 const callId = document.querySelector('.call-id');
+const callerName = document.querySelector('.caller-name');
 
 // rightSide.classList.remove('show');
 
@@ -87,6 +88,11 @@ var chatData = [
 // connectButton.onclick = () => {
 videoActionStartCall.onclick = () => {
 	console.log("== connect")
+
+    if (callerName.value.trim() == "" || callId.value.trim() == "") {
+        return
+    }
+
 	connect()
     // videoCallActions.style.display = "flex";
     rightSide.style.display = "flex";
@@ -179,6 +185,8 @@ function negotiate() {
             body: JSON.stringify({
                 sdp: offer.sdp,
                 type: offer.type,
+                call_id: callId.value,
+                caller_name: callerName.value,
             }),
             headers: {
                 'Content-Type': 'application/json'
@@ -245,10 +253,11 @@ function connect() {
     dc.addEventListener('close', () => {
         console.log("+++ datachannel on close")
     });
+    console.log("dddddddd", callerName.value)
 
     dc.addEventListener('open', () => {
         console.log("+++ datachannel on open")
-        dc.send(JSON.stringify({ type: "name", name: "aaaa" }));
+        dc.send(JSON.stringify({ type: "name", name: callerName.value }));
     });
 
     dc.addEventListener('message', (evt) => {
