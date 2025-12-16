@@ -9,12 +9,17 @@ var localVideoStream = null;
 
 var remoteAudio = document.getElementById('audio');
 
+const setupMenu = document.querySelector('.setup-menu');
+const menuVideo = document.querySelector('.menu-video');
 const mainVideo = document.querySelector('.main-video');
 const localVideoMini = document.querySelector('.local-video-mini');
 const videoCallActions = document.querySelector('.video-call-actions')
 const rightSide = document.querySelector('.right-side');
 const videoActionEndCall = document.querySelector('.video-action-button.endcall');
 const videoActionStartCall = document.querySelector('.video-action-button.startcall');
+
+const newCall = document.querySelector('.new-call');
+const callId = document.querySelector('.call-id');
 
 // rightSide.classList.remove('show');
 
@@ -85,8 +90,10 @@ videoActionStartCall.onclick = () => {
 	connect()
     // videoCallActions.style.display = "flex";
     rightSide.style.display = "flex";
-    // mainVideo.style.display = "flex"
+    mainVideo.style.display = "flex"
     localVideoMini.srcObject = localVideoStream
+
+    menuVideo.srcObject = null
 
     videoActionEndCall.style.display = "block"
     videoActionStartCall.style.display = "none"
@@ -97,13 +104,23 @@ videoActionEndCall.onclick = () => {
 	console.log("== stop")
 	stop()
     localVideoMini.srcObject = null;
-    // mainVideo.srcObject = null;
-    mainVideo.srcObject = localVideoStream;
+    mainVideo.srcObject = null;
+
+    menuVideo.srcObject = localVideoStream
+    // mainVideo.srcObject = localVideoStream;
     rightSide.style.display = "none";
     videoActionEndCall.style.display = "none"
     videoActionStartCall.style.display = "block"
 }
+
+newCall.onclick = () => {
+    callId.value = randomString(5)
+}
 start()
+
+function randomString(length = 10) {
+  return Math.random().toString(36).substring(2, 2 + length);
+}
 
 window.onbeforeunload = function (event) {
     stop()
@@ -194,7 +211,8 @@ function start() {
             localVideoStream = stream
             // localVideoMini.srcObject = stream
 
-            mainVideo.srcObject = stream
+            // mainVideo.srcObject = stream
+            menuVideo.srcObject = stream
         }, (err) => {
             alert('Could not acquire media: ' + err);
         });
@@ -259,6 +277,10 @@ function connect() {
 }
 
 function stop() {
+    mainVideo.style.display = "none"
+    mainVideo.srcObject = null;
+    setupMenu.style.display = "flex"
+
     // close data channel
     if (dc) {
         dc.send(JSON.stringify({ type: "close", close: true }));
@@ -266,7 +288,7 @@ function stop() {
     }
 
     // close transceivers
-    if (peerConn.getTransceivers) {
+    if (peerConn?.getTransceivers) {
         peerConn.getTransceivers().forEach((transceiver) => {
             if (transceiver.stop) {
                 transceiver.stop();
