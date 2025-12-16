@@ -22,68 +22,12 @@ const newCall = document.querySelector('.new-call');
 const callId = document.querySelector('.call-id');
 const callerName = document.querySelector('.caller-name');
 
+const chatInput = document.querySelector('.chat-input');
+const sendButton = document.querySelector('.send-button');
+
 // rightSide.classList.remove('show');
 
 var userId = null
-
-var chatData = [
-    {
-        id: Date.now(),
-        sender: "Ryan Patrick",
-        userId: "pc4",
-        message: "Helloo team!😍",
-        img: "https://images.unsplash.com/photo-1581824283135-0666cf353f35?ixlib=rb-1.2.1&auto=format&fit=crop&w=1276&q=80",
-        timestamp: new Date().toISOString()
-    },
-    {
-        id: Date.now(),
-        sender: "Andy Will",
-        userId: "pc4",
-        message: "Hello! Can you hear me?🤯",
-        img: "https://images.unsplash.com/photo-1566821582776-92b13ab46bb4?ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60",
-        timestamp: new Date().toISOString()
-    },
-    {
-        id: Date.now(),
-        sender: "Jessica Bell",
-        userId: "pc4",
-        message: "Hi team! Let's get started it.",
-        img: "https://images.unsplash.com/photo-1600207438283-a5de6d9df13e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1234&q=80",
-        timestamp: new Date().toISOString()
-    },
-    {
-        id: Date.now(),
-        sender: "Emmy Lou",
-        userId: "pc4",
-        message: "Good morning!🌈",
-        img: "https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80",
-        timestamp: new Date().toISOString()
-    },
-    {
-        id: Date.now(),
-        sender: "Tim Russel",
-        userId: "pc4",
-        message: "New design document⬇️",
-        img: "https://images.unsplash.com/photo-1576110397661-64a019d88a98?ixlib=rb-1.2.1&auto=format&fit=crop&w=1234&q=80",
-        timestamp: new Date().toISOString()
-    },
-    {
-        id: Date.now(),
-        sender: "Ryan Patrick",
-        userId: "pc4",
-        message: "Hi team!❤️",
-        img: "https://images.unsplash.com/photo-1581824283135-0666cf353f35?ixlib=rb-1.2.1&auto=format&fit=crop&w=1276&q=80",
-        timestamp: new Date().toISOString()
-    },
-    {
-        id: Date.now(),
-        sender: "Emmy Lou",
-        userId: "pc1",
-        message: "Woooww! Awesome❤️",
-        img: "https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80",
-        timestamp: new Date().toISOString()
-    },
-]
 
 // connectButton.onclick = () => {
 videoActionStartCall.onclick = () => {
@@ -122,6 +66,18 @@ videoActionEndCall.onclick = () => {
 newCall.onclick = () => {
     callId.value = randomString(5)
 }
+
+sendButton.onclick = () => {
+    message = chatInput.value
+    if (message.trim() === "") {
+        return
+    }
+    dc.send(JSON.stringify({ type: "chat", message: message }));
+}
+// dc.send(JSON.stringify({ type: "name", name: callerName.value }));
+
+
+
 start()
 
 function randomString(length = 10) {
@@ -266,16 +222,17 @@ function connect() {
         if (message.type === "user_id") {
             userId = message.user_id
 
-            chatData.forEach(c => {
-                addMessage(c.userId, c.sender, c.message, c.img)
-            })
+            // chatData.forEach(c => {
+            //     addMessage(c.userId, c.sender, c.message, c.img)
+            // })
+        } else if (message.type === "chat") {
+            addMessage(
+                message.user_id,
+                message.sender,
+                message.message,
+                "https://images.unsplash.com/photo-1566821582776-92b13ab46bb4?ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60"
+            )
         }
-        // console.log("dc <-", evt.data)
-        // if (evt.data.substring(0, 4) === 'pong') {
-            // var elapsed_ms = current_stamp() - parseInt(evt.data.substring(5), 10);
-            // console.log("dc rtt", elapsed_ms)
-
-        // }
     });
 
     localVideoStream.getTracks().forEach((track) => {

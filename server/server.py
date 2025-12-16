@@ -212,7 +212,8 @@ async def offer(request):
         "tracks": {"video": None, "audio": None},
         "transceivers": [],
         "name": caller_name,
-        "id": pc_id
+        "id": pc_id,
+        "datachannel": None,
     })
 
     for i in range(MAX_TRANSCEIVERS):
@@ -223,6 +224,8 @@ async def offer(request):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
+        connection_data[call_id][pc_id].datachannel = channel
+
         @channel.on("open")
         def on_open():
             print("datachannel open")
@@ -247,6 +250,16 @@ async def offer(request):
                 print("datachannel message - close")
                 await pc.close()
                 connection_data[call_id].pop(pc_id, None)
+            elif data.get("type") == "chat":
+                for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
+                    message = json.dumps({
+                        "type": "chat",
+                        "sender": caller_name,
+                        "message": data["message"],
+                        "img": None,
+                        "user_id": pc_id,
+                    })
+                    other_pc_data.datachannel.send(message)
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
