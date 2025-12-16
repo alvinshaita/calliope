@@ -22,6 +22,7 @@ const newCall = document.querySelector('.new-call');
 const callId = document.querySelector('.call-id');
 const callerName = document.querySelector('.caller-name');
 
+const chatArea = document.querySelector('.chat-area');
 const chatInput = document.querySelector('.chat-input');
 const sendButton = document.querySelector('.send-button');
 
@@ -73,6 +74,7 @@ sendButton.onclick = () => {
         return
     }
     dc.send(JSON.stringify({ type: "chat", message: message }));
+    chatInput.value = ""
 }
 // dc.send(JSON.stringify({ type: "name", name: callerName.value }));
 
@@ -302,10 +304,7 @@ expandBtn.addEventListener('click', () => {
 });
 
 
-const chatArea = document.querySelector('.chat-area');
-
 function addMessage(senderId, name, messageText, imageUrl) {
-    const chatArea = document.querySelector('.chat-area');
     const messageWrapper = document.createElement('div');
     messageWrapper.classList.add('message-wrapper');
 
@@ -340,4 +339,5 @@ function addMessage(senderId, name, messageText, imageUrl) {
     messageWrapper.appendChild(messageContentDiv);
 
     chatArea.appendChild(messageWrapper);
+    chatArea.scrollTop = chatArea.scrollHeight;
 }
