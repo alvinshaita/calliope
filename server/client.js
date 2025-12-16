@@ -29,6 +29,7 @@ const sendButton = document.querySelector('.send-button');
 // rightSide.classList.remove('show');
 
 var userId = null
+var prevMessageSender = null
 
 // connectButton.onclick = () => {
 videoActionStartCall.onclick = () => {
@@ -312,29 +313,34 @@ function addMessage(senderId, name, messageText, imageUrl) {
         messageWrapper.classList.add('reverse');
     }
 
+    if (senderId === prevMessageSender) {
+        messageWrapper.classList.add('bundle');
+    }
+
     const profilePictureDiv = document.createElement('div');
     profilePictureDiv.classList.add('profile-picture');
 
-    const profileImg = document.createElement('img');
-    profileImg.src = imageUrl;
-    profileImg.alt = '';
-
     const messageContentDiv = document.createElement('div');
     messageContentDiv.classList.add('message-content');
-
-    const nameP = document.createElement('p');
-    nameP.classList.add('name');
-    nameP.textContent = name;
 
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message');
     messageDiv.innerHTML = messageText;
 
-    profilePictureDiv.appendChild(profileImg);
+    if (prevMessageSender != senderId) {
+        const profileImg = document.createElement('img');
+        profileImg.src = imageUrl;
+        profileImg.alt = '';
+        profilePictureDiv.appendChild(profileImg);
 
-    messageContentDiv.appendChild(nameP);     
+        const nameP = document.createElement('p');
+        nameP.classList.add('name');
+        nameP.textContent = name;
+        messageContentDiv.appendChild(nameP);
+    }
+    prevMessageSender = message.user_id
+
     messageContentDiv.appendChild(messageDiv);
-
     messageWrapper.appendChild(profilePictureDiv);
     messageWrapper.appendChild(messageContentDiv);
 

@@ -329,7 +329,10 @@ body.dark .btn-close-right {
   color: var(--message-text);
 }
 .message-wrapper {
-  padding: 16px 0;
+  padding-top: 16px;
+}
+.message-wrapper.bundle {
+  padding-top: 0px;
 }
 .message-wrapper.reverse {
   flex-direction: row-reverse;
