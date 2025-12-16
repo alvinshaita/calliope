@@ -24,7 +24,8 @@ import time
 from fractions import Fraction
 import math
 
-peer_data = attridict()
+connection_data = attridict()
+# peer_data = attridict()
 count=0
 MAX_TRANSCEIVERS = 1
 relay = MediaRelay()
@@ -153,7 +154,6 @@ class LabelVideoStream(VideoStreamTrack):
         cv2.putText(
             img, 
             self.username,
-            # peer_data[self.pc_id]["name"],
             (40, 40),                      # position
             cv2.FONT_HERSHEY_SIMPLEX, 
             1.2,                            # size
@@ -196,7 +196,18 @@ async def offer(request):
     pc_id = f"pc{count}"
     print("peer connection id: ", pc_id)
 
-    peer_data[pc_id] = attridict({
+    # peer_data[pc_id] = attridict({
+    #     "peer_connection": pc,
+    #     "tracks": {"video": None, "audio": None},
+    #     "transceivers": [],
+    #     "name": caller_name,
+    #     "id": pc_id
+    # })
+
+    if connection_data.get(call_id) is None:
+        connection_data[call_id] = {}
+
+    connection_data[call_id][pc_id] = attridict({
         "peer_connection": pc,
         "tracks": {"video": None, "audio": None},
         "transceivers": [],
@@ -206,9 +217,9 @@ async def offer(request):
 
     for i in range(MAX_TRANSCEIVERS):
         transceiver = pc.addTransceiver("video", direction="sendrecv")
-        peer_data[pc_id]["transceivers"].append(transceiver)
+        connection_data[call_id][pc_id]["transceivers"].append(transceiver)
 
-    print("----------", peer_data)
+    print("----------", connection_data)
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -235,17 +246,17 @@ async def offer(request):
             elif data.get("type") == "close":
                 print("datachannel message - close")
                 await pc.close()
-                peer_data.pop(pc_id, None)
+                connection_data[call_id].pop(pc_id, None)
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
         print(f"Connection state is {pc.connectionState} == {pc.iceConnectionState}")
         if pc.connectionState == "failed":
             await pc.close()
-            peer_data.pop(pc_id, None)
+            connection_data[call_id].pop(pc_id, None)
         if pc.connectionState == "closed":
             await pc.close()
-            peer_data.pop(pc_id, None)
+            connection_data[call_id].pop(pc_id, None)
 
     @pc.on("track")
     def on_track(track):
@@ -253,7 +264,7 @@ async def offer(request):
 
         if track.kind == "audio":
             # ...
-            for other_pc_id, other_pc_data in list(peer_data.items()):
+            for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
                 if other_pc_id != pc_id:
                     print("bbbbbbbbbbb", other_pc_id, pc_id)
                     other_pc_data.peer_connection.addTrack(relay.subscribe(track))
@@ -263,8 +274,8 @@ async def offer(request):
             # peer_data[pc_id]["tracks"]["audio"] = track
             # pc.addTrack(relay.subscribe(track))
         elif track.kind == "video":
-            peer_data[pc_id]["tracks"]["video"] = track
-            overlay = CompositeTrack(track, peer_data, pc_id)
+            connection_data[call_id][pc_id]["tracks"]["video"] = track
+            overlay = CompositeTrack(track, connection_data[call_id], pc_id)
             pc.addTrack(overlay)
 
         @track.on("ended")
@@ -290,9 +301,9 @@ async def offer(request):
 
 async def on_shutdown(app):
     # close peer connections
-    coros = [pd["peer_connection"].close() for pd in peer_data.values()]
+    coros = [pd["peer_connection"].close() for pds in connection_data.values() for pd in pds.values()]
     await asyncio.gather(*coros)
-    peer_data.clear()
+    connection_data.clear()
 
 
 
