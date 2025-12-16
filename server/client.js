@@ -77,6 +77,11 @@ sendButton.onclick = () => {
 // dc.send(JSON.stringify({ type: "name", name: callerName.value }));
 
 
+chatInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        sendButton.click()
+    }
+})
 
 start()
 
