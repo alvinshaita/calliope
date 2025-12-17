@@ -26,6 +26,25 @@ const chatArea = document.querySelector('.chat-area');
 const chatInput = document.querySelector('.chat-input');
 const sendButton = document.querySelector('.send-button');
 
+const participants = document.querySelector('.participants');
+var activeParticipants = {}
+
+function refreshParticipants() {
+    noOfParticipantsToDisplay = 4
+    participants.innerHTML = ""
+    var extraParticipants = 0
+    
+    const activeParticipantsValues = Object.values(activeParticipants)
+    activeParticipantsValues.slice(0,noOfParticipantsToDisplay).forEach(participant => {
+        participants.innerHTML += `<div class="participant profile-picture">${participant.name[0].toUpperCase()}</div>`
+    })
+
+    extraParticipants = activeParticipantsValues.length - noOfParticipantsToDisplay
+    if (extraParticipants > 0) {
+        participants.innerHTML += `<div class="participant-more">+${extraParticipants}</div>`
+    }
+}
+
 // rightSide.classList.remove('show');
 
 var userId = null
@@ -240,6 +259,13 @@ function connect() {
                 message.message,
                 "https://images.unsplash.com/photo-1566821582776-92b13ab46bb4?ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60"
             )
+        } else if (message.type === "join") {
+            activeParticipants[message.user_id] = {
+                name: message.name
+            }
+            refreshParticipants()
+        } else if (message.type === "leave") {
+            delete activeParticipants[message.user_id]
         }
     });
 

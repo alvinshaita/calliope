@@ -246,10 +246,44 @@ async def offer(request):
                     "user_id": pc_id
                 })
                 channel.send(user_id)
+
+                for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
+                    if other_pc_id == pc_id:
+                        continue
+
+                    # let everyone know that you joined
+                    msg = json.dumps({
+                        "type": "join",
+                        "name": caller_name,
+                        "user_id": pc_id,
+                    })
+                    other_pc_data.datachannel.send(msg)
+
+                    # let you know who's in the meeting
+                    msg = json.dumps({
+                        "type": "join",
+                        "name": other_pc_data.name,
+                        "user_id": other_pc_id,
+                    })
+                    channel.send(msg)
+
             elif data.get("type") == "close":
                 print("datachannel message - close")
+
+                for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
+                    if other_pc_id == pc_id:
+                        continue
+
+                    msg = json.dumps({
+                        "type": "leave",
+                        "name": caller_name,
+                        "user_id": pc_id,
+                    })
+                    other_pc_data.datachannel.send(msg)
+
                 await pc.close()
                 connection_data[call_id].pop(pc_id, None)
+
             elif data.get("type") == "chat":
                 for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
                     message = json.dumps({

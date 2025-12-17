@@ -296,6 +296,12 @@ body.dark .btn-close-right {
   padding: 16px;
 }
 .profile-picture {
+  /*background-color: none;*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid grey;
+
   border-radius: 8px;
   width: 32px;
   height: 32px;
