@@ -18,8 +18,7 @@ const rightSide = document.querySelector('.right-side');
 const videoActionEndCall = document.querySelector('.video-action-button.endcall');
 const videoActionStartCall = document.querySelector('.video-action-button.startcall');
 
-const newCall = document.querySelector('.new-call');
-const callId = document.querySelector('.call-id');
+const callIdView = document.querySelector('.call-id-view');
 const callerName = document.querySelector('.caller-name');
 
 const chatArea = document.querySelector('.chat-area');
@@ -27,13 +26,16 @@ const chatInput = document.querySelector('.chat-input');
 const sendButton = document.querySelector('.send-button');
 
 const participants = document.querySelector('.participants');
+
+const callId = window.location.pathname.replace("/", "")
+
 var activeParticipants = {}
 
 function refreshParticipants() {
     noOfParticipantsToDisplay = 4
     participants.innerHTML = ""
     var extraParticipants = 0
-    
+
     const activeParticipantsValues = Object.values(activeParticipants)
     activeParticipantsValues.slice(0,noOfParticipantsToDisplay).forEach(participant => {
         participants.innerHTML += `<div class="participant profile-picture">${participant.name[0].toUpperCase()}</div>`
@@ -54,7 +56,7 @@ var prevMessageSender = null
 videoActionStartCall.onclick = () => {
 	console.log("== connect")
 
-    if (callerName.value.trim() == "" || callId.value.trim() == "") {
+    if (callerName.value.trim() == "" || callId.trim() == "") {
         return
     }
 
@@ -84,10 +86,6 @@ videoActionEndCall.onclick = () => {
     videoActionStartCall.style.display = "block"
 }
 
-newCall.onclick = () => {
-    callId.value = randomString(5)
-}
-
 sendButton.onclick = () => {
     message = chatInput.value
     if (message.trim() === "") {
@@ -105,6 +103,7 @@ chatInput.addEventListener("keydown", function(event) {
     }
 })
 
+callIdView.innerHTML = callId
 start()
 
 function randomString(length = 10) {
@@ -168,7 +167,7 @@ function negotiate() {
             body: JSON.stringify({
                 sdp: offer.sdp,
                 type: offer.type,
-                call_id: callId.value,
+                call_id: callId,
                 caller_name: callerName.value,
             }),
             headers: {
@@ -200,10 +199,8 @@ function start() {
     if (constraints.audio || constraints.video) {
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
             localVideoStream = stream
-            // localVideoMini.srcObject = stream
-
-            // mainVideo.srcObject = stream
             menuVideo.srcObject = stream
+            menuVideo.muted = true
         }, (err) => {
             alert('Could not acquire media: ' + err);
         });
