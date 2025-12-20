@@ -86,6 +86,22 @@ body {
   /*align-items: right;*/
 }
 
+.call-id {
+  height: 40px;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.join-call {
+  /*display: flex;*/
+  width: 150px;
+  /*font-size: 16px;*/
+  font-size: 15px;
+  height: 40px;
+  /*justify-content: center;*/
+  /*align-items: right;*/
+}
+
 .menu-video {
   /*width: 70%;*/
   height: 70%;
@@ -279,6 +295,10 @@ body.dark .btn-close-right {
 .chat-header {
   padding: 16px;
   border-bottom: 1px solid #f5f5f5;
+  font-weight: 500;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 .chat-header-button {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg' fill='%23fff'%3E%3Cpath d='M479.9 187.52l-90.19 68.53v-52.6a20 20 0 00-20-20H20a20 20 0 00-20 20V492a20 20 0 0020 20h349.71a20 20 0 0020-20v-52.6l90.18 68.52c13.05 9.91 32.1.67 32.1-15.92V203.45c0-16.5-18.94-25.92-32.1-15.93zM349.7 472H40V223.45h309.71zM472 451.68l-82.29-62.53V306.3L472 243.77zM87.96 79.24C129.62 28.88 190.86 0 256 0c65.13 0 126.37 28.88 168.03 79.24a20 20 0 01-30.82 25.5A177.6 177.6 0 00256 40a177.6 177.6 0 00-137.21 64.73 20 20 0 11-30.83-25.5zm240.36 32.21a20 20 0 11-21.02 34.03 97.57 97.57 0 00-51.3-14.53 97.6 97.6 0 00-51.31 14.53 20 20 0 11-21.02-34.03A137.53 137.53 0 01256 90.95c25.59 0 50.6 7.09 72.32 20.5zm0 0'/%3E%3C/svg%3E%0A");
