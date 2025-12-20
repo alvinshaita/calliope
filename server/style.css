@@ -90,6 +90,7 @@ body {
   /*width: 70%;*/
   height: 70%;
   border-radius: 14px;
+  transform: scaleX(-1);
 }
 
 .video-view {
@@ -111,6 +112,7 @@ body {
 	border-radius: 10px;
 	height: 25%;
 	overflow: hidden;
+  transform: scaleX(-1);
 }
 
 
