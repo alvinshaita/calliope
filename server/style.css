@@ -92,6 +92,14 @@ body {
   padding: 10px;
 }
 
+.caller-name {
+  border: 1px solid grey;
+  height: 30px;
+  font-size: 16px;
+  padding: 25px;
+  border-radius: 8px;
+}
+
 .join-call {
   /*display: flex;*/
   width: 150px;
@@ -142,6 +150,19 @@ body {
   flex-wrap: wrap;
 }*/
 
+
+
+.enter-name {
+  /*background-color: red;*/
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  flex: 1;
+}
 
 
 
