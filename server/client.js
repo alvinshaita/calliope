@@ -44,13 +44,16 @@ micButton.onclick = () => {
 }
 
 cameraButton.onclick = () => {
+    const videoTrack = localVideoStream?.getVideoTracks()[0]
     const isCameraOff = cameraButton.classList[2] === "off"
     if (isCameraOff) {
         // set to camera on
         cameraButton.classList.toggle('off', false);
+        videoTrack.enabled = true
     } else {
         // set to camera off
         cameraButton.classList.toggle('off', true);
+        videoTrack.enabled = false
     }
 }
 
@@ -84,6 +87,7 @@ videoActionStartCall.onclick = () => {
 	console.log("== connect")
 
     if (callerName.value.trim() == "" || callId.trim() == "") {
+        callerName.style.border = "2px solid red"
         return
     }
 
