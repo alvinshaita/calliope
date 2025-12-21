@@ -144,6 +144,9 @@ body {
   transform: scaleX(-1);
 }
 
+.call-id-view {
+  color: var(--message-text);
+}
 
 
 /*.video-call-wrapper {
@@ -167,6 +170,7 @@ body {
   align-items: center;
   font-size: 24px;
   flex: 1;
+  color: var(--message-text);
 }
 
 .meeting-setup {
@@ -354,6 +358,7 @@ body.dark .btn-close-right {
 
 .participant.profile-picture {
   border: 1px solid grey;
+  color: var(--message-text);
 }
 .profile-picture {
   /*background-color: none;*/
