@@ -27,6 +27,33 @@ const sendButton = document.querySelector('.send-button');
 
 const participants = document.querySelector('.participants');
 
+
+const micButton = document.querySelector('.video-action-button.mic');
+const cameraButton = document.querySelector('.video-action-button.camera');
+
+
+micButton.onclick = () => {
+    const isMicMuted = micButton.classList[2] === "muted"
+    if (isMicMuted) {
+        // set to mic unmuted
+        micButton.classList.toggle('muted', false);
+    } else {
+        // set to mic muted
+        micButton.classList.toggle('muted', true);
+    }
+}
+
+cameraButton.onclick = () => {
+    const isCameraOff = cameraButton.classList[2] === "off"
+    if (isCameraOff) {
+        // set to camera on
+        cameraButton.classList.toggle('off', false);
+    } else {
+        // set to camera off
+        cameraButton.classList.toggle('off', true);
+    }
+}
+
 const callId = window.location.pathname.replace("/", "")
 
 var activeParticipants = {}
