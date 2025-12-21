@@ -47,16 +47,15 @@ class CompositeTrack(VideoStreamTrack):
         frames = []
 
         if len(self.peer_data) == 1:
-            # print("111111111111111111111111111111")
+            # frame.to_ndarray(format="bgr24")
             frame = await self.track.recv()
+            # frame = self.peer_data[self.pc_id]["latest_frame"]
             return frame
-        else:
-            ...
-            # print("000000000000000000000000000000", self.peer_data)
-        #     print("1111111111")
-        #     return None
-        # # else:
-        # #     print("2222222222222")
+
+            # img = self.peer_data[self.pc_id]["latest_frame"]
+            # new_frame = VideoFrame.from_ndarray(img, format="bgr24")
+            # return new_frame
+
 
         for pc_id, pdata in list(self.peer_data.items()):   
 
@@ -68,7 +67,11 @@ class CompositeTrack(VideoStreamTrack):
                 continue
             try:
                 frame = await track.recv()
+                # frame = self.peer_data[pc_id]["latest_frame"]
                 img = frame.to_ndarray(format="bgr24")
+                if img is None:
+                    print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ = latest_frame is None")
+                    continue
 
                 cv2.putText(
                     img, 
@@ -218,6 +221,7 @@ async def offer(request):
         "name": caller_name,
         "id": pc_id,
         "datachannel": None,
+        # "latest_frame": None,
     })
 
     for i in range(MAX_TRANSCEIVERS):
@@ -313,11 +317,22 @@ async def offer(request):
     def on_track(track):
         print(f"track {track.kind} received")
 
+        # async def track_worker(track, pc_id):
+        #     try:
+        #         while True:
+        #             frame = await track.recv()
+        #             connection_data[call_id][pc_id]["latest_frame"] = frame
+
+        #             # connection_data[call_id][pc_id]["latest_frame"] = frame.to_ndarray(format="bgr24")
+        #     except Exception as e:
+        #         print("EEEEEEEEEEEEEEEEEEEEE111", e)
+
+
         if track.kind == "audio":
             # ...
             for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
                 if other_pc_id != pc_id:
-                    print("bbbbbbbbbbb", other_pc_id, pc_id)
+                    print("bbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBB", other_pc_id, pc_id)
                     other_pc_data.peer_connection.addTrack(relay.subscribe(track))
 
 
@@ -325,6 +340,7 @@ async def offer(request):
             # peer_data[pc_id]["tracks"]["audio"] = track
             # pc.addTrack(relay.subscribe(track))
         elif track.kind == "video":
+            # asyncio.create_task(track_worker(track, pc_id))
             connection_data[call_id][pc_id]["tracks"]["video"] = track
             overlay = CompositeTrack(track, connection_data[call_id], pc_id)
             pc.addTrack(overlay)
