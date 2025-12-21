@@ -382,10 +382,12 @@ function addMessage(senderId, name, messageText, imageUrl) {
     messageDiv.innerHTML = messageText;
 
     if (prevMessageSender != senderId) {
-        const profileImg = document.createElement('img');
-        profileImg.src = imageUrl;
-        profileImg.alt = '';
-        profilePictureDiv.appendChild(profileImg);
+        // const profileImg = document.createElement('img');
+        // profileImg.src = imageUrl;
+        // profileImg.alt = '';
+        // profilePictureDiv.appendChild(profileImg);
+
+        profilePictureDiv.innerHTML = `<div class="participant profile-picture">${name[0].toUpperCase()}</div>`
 
         const nameP = document.createElement('p');
         nameP.classList.add('name');
