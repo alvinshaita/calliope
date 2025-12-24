@@ -1,7 +1,7 @@
 from flask import Flask, request, Response
 import requests
 
-AIOHTTP_PORT = 8000
+AIOHTTP_PORT = 8050
 AIOHTTP_HOST = '127.0.0.1'
 
 app = Flask(__name__)

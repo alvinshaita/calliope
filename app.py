@@ -395,4 +395,4 @@ if __name__ == "__main__":
     app.router.add_get("/style.css", css)
     app.router.add_post("/offer", offer)
 
-    web.run_app(app, access_log=None, host="0.0.0.0", port=8000)
+    web.run_app(app, access_log=None, host="0.0.0.0", port=8050)
