@@ -34,7 +34,7 @@
       newCall.onclick = () => {
         callId.value = randomString(5)
 
-        window.location.href=`/${callId.value}`
+        window.location.href = callId.value
       }
 
       joinCall.onclick = () => {
@@ -46,7 +46,7 @@
 
         const code = callIdValue.substr(-5);
 
-        window.location.href=`/${code}`
+        window.location.href = code
       }
 
       function randomString(length = 10) {

@@ -194,7 +194,7 @@ function negotiate() {
     }).then(() => {
         var offer = peerConn.localDescription;
 
-        return fetch('/offer', {
+        return fetch('offer', {
             body: JSON.stringify({
                 sdp: offer.sdp,
                 type: offer.type,
