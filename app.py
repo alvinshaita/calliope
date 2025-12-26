@@ -12,7 +12,7 @@ from aiortc import (
     MediaStreamTrack
 )
 from aiortc.contrib.media import (
-    MediaRelay
+    MediaPlayer, MediaRelay
 )
 from av import VideoFrame
 
@@ -344,6 +344,17 @@ async def offer(request):
             connection_data[call_id][pc_id]["tracks"]["video"] = track
             overlay = CompositeTrack(track, connection_data[call_id], pc_id)
             pc.addTrack(overlay)
+
+            # player = MediaPlayer(
+            #     "workshop.mp4",
+            #     format="mp4",
+            #     options={"framerate": "30"}
+            # )
+            # pc.addTrack(player.video)
+
+            # @player.video.on("ended")
+            # async def on_ended():
+            #     print("player video track ended")
 
         @track.on("ended")
         async def on_ended():
