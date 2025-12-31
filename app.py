@@ -186,7 +186,7 @@ async def javascript(request):
 
 
 async def css(request):
-    content = open(os.path.join(ROOT, "style.css"), "r").read()
+    content = open(os.path.join(ROOT, "public/style.css"), "r").read()
     return web.Response(content_type="text/css", text=content)
 
 
