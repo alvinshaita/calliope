@@ -70,7 +70,6 @@ class CompositeTrack(VideoStreamTrack):
                 # frame = self.peer_data[pc_id]["latest_frame"]
                 img = frame.to_ndarray(format="bgr24")
                 if img is None:
-                    print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ = latest_frame is None")
                     continue
 
                 cv2.putText(
@@ -96,16 +95,6 @@ class CompositeTrack(VideoStreamTrack):
             return out
 
         try:
-            # h = 480
-            # resized = [cv2.resize(f, (h, h)) for f in frames]
-            # combined = cv2.hconcat(resized)
-
-            # new_frame = VideoFrame.from_ndarray(combined, format="bgr24")
-            # new_frame.pts = int(time.time() * 90000)
-            # new_frame.time_base = Fraction(1, 90000)
-            # return new_frame
-
-
             num_clients = len(frames)
             cols = math.ceil(math.sqrt(num_clients))
             rows = math.ceil(num_clients / cols)
@@ -202,14 +191,6 @@ async def offer(request):
     pc = RTCPeerConnection()
     pc_id = f"pc{count}"
     print("peer connection id: ", pc_id)
-
-    # peer_data[pc_id] = attridict({
-    #     "peer_connection": pc,
-    #     "tracks": {"video": None, "audio": None},
-    #     "transceivers": [],
-    #     "name": caller_name,
-    #     "id": pc_id
-    # })
 
     if connection_data.get(call_id) is None:
         connection_data[call_id] = {}
@@ -317,30 +298,26 @@ async def offer(request):
     def on_track(track):
         print(f"track {track.kind} received")
 
-        # async def track_worker(track, pc_id):
-        #     try:
-        #         while True:
-        #             frame = await track.recv()
-        #             connection_data[call_id][pc_id]["latest_frame"] = frame
-
-        #             # connection_data[call_id][pc_id]["latest_frame"] = frame.to_ndarray(format="bgr24")
-        #     except Exception as e:
-        #         print("EEEEEEEEEEEEEEEEEEEEE111", e)
-
+        async def track_worker(track, pc_id):
+            try:
+                while True:
+                    frame = await track.recv()
+                    connection_data[call_id][pc_id]["latest_frame"] = frame
+                    # connection_data[call_id][pc_id]["latest_frame"] = frame.to_ndarray(format="bgr24")
+            except Exception as e:
+                print("Error:", e)
 
         if track.kind == "audio":
             # ...
             for other_pc_id, other_pc_data in list(connection_data[call_id].items()):
                 if other_pc_id != pc_id:
-                    print("bbbbbbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBB", other_pc_id, pc_id)
                     other_pc_data.peer_connection.addTrack(relay.subscribe(track))
-
-
 
             # peer_data[pc_id]["tracks"]["audio"] = track
             # pc.addTrack(relay.subscribe(track))
         elif track.kind == "video":
             # asyncio.create_task(track_worker(track, pc_id))
+
             connection_data[call_id][pc_id]["tracks"]["video"] = track
             overlay = CompositeTrack(track, connection_data[call_id], pc_id)
             pc.addTrack(overlay)
@@ -368,7 +345,6 @@ async def offer(request):
     answer = await pc.createAnswer()
     print("setLocalDescription")
     await pc.setLocalDescription(answer)
-    print("555")
 
     return web.Response(
         content_type="application/json",
@@ -399,7 +375,6 @@ if __name__ == "__main__":
     app.router.add_static('/static/', path=os.path.join(ROOT, 'static'), name='static')
 
     app.router.add_get("/", register)
-    # app.router.add_get("/{call_id}", index)
     app.router.add_get("/{call_id:[a-zA-Z0-9_-]{5}}", index)
 
     app.router.add_get("/client.js", javascript)
