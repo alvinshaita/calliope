@@ -149,6 +149,19 @@ body {
   color: var(--message-text);
 }
 
+.title-view {
+  position: absolute;
+  display: flex;
+  top: 25px;
+  left: 25px;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  /*gap: 20px;*/
+  font-size: 24px;
+  font-weight: 500;
+}
+
 
 /*.video-call-wrapper {
   width: 100%;
@@ -667,9 +680,9 @@ body.dark .btn-close-right {
 }
 .mode-switch {
   z-index: 1;
-  position: absolute;
-  top: 20px;
-  left: 36px;
+  /*position: absolute;*/
+  /*top: 20px;*/
+  /*left: 36px;*/
   background-color: var(--chat-background);
   border: none;
   color: #ddd;

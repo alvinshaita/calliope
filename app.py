@@ -171,17 +171,17 @@ class LabelVideoStream(VideoStreamTrack):
         return new_frame
 
 
-async def index(request):
-    content = open(os.path.join(ROOT, "index.html"), "r").read()
+async def register(request):
+    content = open(os.path.join(ROOT, "public/register.html"), "r").read()
     return web.Response(content_type="text/html", text=content)
 
-async def one(request):
+async def index(request):
     call_id = request.match_info.get("call_id", "")
-    content = open(os.path.join(ROOT, "one.html"), "r").read()
+    content = open(os.path.join(ROOT, "public/index.html"), "r").read()
     return web.Response(content_type="text/html", text=content)
 
 async def javascript(request):
-    content = open(os.path.join(ROOT, "client.js"), "r").read()
+    content = open(os.path.join(ROOT, "public/client.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
 
 
@@ -398,9 +398,9 @@ if __name__ == "__main__":
     # Serve static files (images, favico, css, etc.)
     app.router.add_static('/static/', path=os.path.join(ROOT, 'static'), name='static')
 
-    app.router.add_get("/", index)
-    # app.router.add_get("/{call_id}", one)
-    app.router.add_get("/{call_id:[a-zA-Z0-9_-]{5}}", one)
+    app.router.add_get("/", register)
+    # app.router.add_get("/{call_id}", index)
+    app.router.add_get("/{call_id:[a-zA-Z0-9_-]{5}}", index)
 
     app.router.add_get("/client.js", javascript)
     app.router.add_get("/style.css", css)
